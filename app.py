@@ -2,10 +2,15 @@ from flask import Flask, render_template, jsonify
 from flask_bootstrap import Bootstrap
 from datetime import datetime, timedelta
 from flask_moment import Moment
+import os
+from flask import Flask, request
+from flask import Flask,redirect
+
 
 app = Flask(__name__)
 moment = Moment(app)
 bootstrap = Bootstrap(app)
+
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -35,10 +40,20 @@ def ajax():
     return jsonify({'timestamp': moment.create(datetime.utcnow()).format(
         'LLLL')})
 
+app.config["IMAGE_UPLOADS"] = "HCCEngineeringSociety/static/img"
 
-@app.route('/gallery')
+
+@app.route('/gallery', methods = ['GET','POST'])
 def gallery():
-	return render_template('photo_gallery.html')
+     if request.method == "POST":
+
+        if request.files:
+            image = request.files["image"]
+            image.save(os.path.join(app.config["IMAGE_UPLOADS"], image.filename))
+            print(image)
+            print("img is save")
+            return redirect(request.url)
+     return render_template('photo_gallery.html')
 
 @app.route('/galaxy_stuff')
 def galaxy_stuff():
